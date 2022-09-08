@@ -124,6 +124,7 @@ class DayPageHeader extends CalendarPageHeader {
     Color backgroundColor = Constants.headerBackground,
     StringProvider? dateStringBuilder,
     required DateTime date,
+    Color? textColor,
   }) : super(
           key: key,
           date: date,
@@ -134,6 +135,7 @@ class DayPageHeader extends CalendarPageHeader {
           onTitleTapped: onTitleTapped,
           dateStringBuilder:
               dateStringBuilder ?? DayPageHeader._dayStringBuilder,
+          textColor: textColor,
         );
   static String _dayStringBuilder(DateTime date, {DateTime? secondaryDate}) =>
       "${date.day} - ${date.month} - ${date.year}";

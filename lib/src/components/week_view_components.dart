@@ -3,7 +3,9 @@
 // that can be found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
+import '../constants.dart';
 import 'common_components.dart';
 
 class WeekPageHeader extends CalendarPageHeader {
@@ -15,6 +17,9 @@ class WeekPageHeader extends CalendarPageHeader {
     VoidCallback? onPreviousDay,
     required DateTime startDate,
     required DateTime endDate,
+    Color iconColor = Constants.black,
+    Color backgroundColor = Constants.headerBackground,
+    Color? textColor,
   }) : super(
           key: key,
           date: startDate,
@@ -23,6 +28,9 @@ class WeekPageHeader extends CalendarPageHeader {
           onPreviousDay: onPreviousDay,
           onTitleTapped: onTitleTapped,
           dateStringBuilder: WeekPageHeader._weekStringBuilder,
+          iconColor: iconColor,
+          backgroundColor: backgroundColor,
+          textColor: textColor,
         );
   static String _weekStringBuilder(DateTime date, {DateTime? secondaryDate}) =>
       "${date.day} / ${date.month} / ${date.year} to "
