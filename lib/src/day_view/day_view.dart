@@ -141,9 +141,16 @@ class DayView<T extends Object?> extends StatefulWidget {
   /// This method will be called when user long press on calendar.
   final DatePressCallback? onDateLongPress;
 
+  // Called when dragging over dragTarget
+  final TileDragCallback? onTileDrag;
+
   /// Defines size of the slots that provides long press callback on area
   /// where events are not there.
   final MinuteSlotSize minuteSlotSize;
+
+  final ScrollPhysics? scrollPhysics;
+
+  final ScrollPhysics? pageViewPhysics;
 
   /// Main widget for day view.
   const DayView({
@@ -174,7 +181,10 @@ class DayView<T extends Object?> extends StatefulWidget {
     this.scrollOffset = 0.0,
     this.onEventTap,
     this.onDateLongPress,
+    this.onTileDrag,
     this.minuteSlotSize = MinuteSlotSize.minutes60,
+    this.scrollPhysics,
+    this.pageViewPhysics,
   })  : assert(timeLineOffset >= 0,
             "timeLineOffset must be greater than or equal to 0"),
         assert(width == null || width > 0,
@@ -302,6 +312,31 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
     super.dispose();
   }
 
+  Widget _createListener({required Widget child}) {
+    return child;
+    // return Listener(
+    //   child: child,
+    //   onPointerMove: (event) {
+    //     final render =
+    //         dayViewPageKey.currentContext?.findRenderObject() as RenderBox;
+    //     final position = render.localToGlobal(Offset.zero);
+    //     final topY = position.dy;
+    //     final bottomY = topY + render.size.height;
+    //     const detectedRange = 100;
+    //     const moveDistance = 3;
+
+    //     if (event.position.dy < topY + detectedRange) {
+    //       var to = _scrollController.offset - moveDistance;
+    //       to = (to < 0) ? 0 : to;
+    //       _scrollController.jumpTo(to);
+    //     }
+    //     if (event.position.dy > bottomY - detectedRange) {
+    //       _scrollController.jumpTo(_scrollController.offset + moveDistance);
+    //     }
+    //   },
+    // );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -317,48 +352,54 @@ class DayViewState<T extends Object?> extends State<DayView<T>> {
             children: [
               _dayTitleBuilder(_currentDate),
               Expanded(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: SizedBox(
-                    height: _height,
-                    child: PageView.builder(
-                      itemCount: _totalDays,
-                      controller: _pageController,
-                      onPageChanged: _onPageChange,
-                      itemBuilder: (_, index) {
-                        final date = DateTime(_minDate.year, _minDate.month,
-                            _minDate.day + index);
+                child: _createListener(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    physics: widget.scrollPhysics,
+                    child: SizedBox(
+                      height: _height,
+                      child: PageView.builder(
+                        physics: widget.pageViewPhysics,
+                        itemCount: _totalDays,
+                        controller: _pageController,
+                        onPageChanged: _onPageChange,
+                        itemBuilder: (_, index) {
+                          final date = DateTime(_minDate.year, _minDate.month,
+                              _minDate.day + index);
 
-                        return ValueListenableBuilder(
+                          return ValueListenableBuilder(
                             valueListenable: _scrollConfiguration,
                             builder: (_, __, ___) => InternalDayViewPage<T>(
-                                  key: ValueKey(
-                                      _hourHeight.toString() + date.toString()),
-                                  width: _width,
-                                  liveTimeIndicatorSettings:
-                                      _liveTimeIndicatorSettings,
-                                  timeLineBuilder: _timeLineBuilder,
-                                  eventTileBuilder: _eventTileBuilder,
-                                  heightPerMinute: widget.heightPerMinute,
-                                  hourIndicatorSettings: _hourIndicatorSettings,
-                                  date: date,
-                                  onTileTap: widget.onEventTap,
-                                  onDateLongPress: widget.onDateLongPress,
-                                  showLiveLine: widget
-                                          .showLiveTimeLineInAllDays ||
-                                      date.compareWithoutTime(DateTime.now()),
-                                  timeLineOffset: widget.timeLineOffset,
-                                  timeLineWidth: _timeLineWidth,
-                                  verticalLineOffset: widget.verticalLineOffset,
-                                  showVerticalLine: widget.showVerticalLine,
-                                  height: _height,
-                                  controller: controller,
-                                  hourHeight: _hourHeight,
-                                  eventArranger: _eventArranger,
-                                  minuteSlotSize: widget.minuteSlotSize,
-                                  scrollNotifier: _scrollConfiguration,
-                                ));
-                      },
+                              key: ValueKey(
+                                  _hourHeight.toString() + date.toString()),
+                              width: _width,
+                              liveTimeIndicatorSettings:
+                                  _liveTimeIndicatorSettings,
+                              timeLineBuilder: _timeLineBuilder,
+                              eventTileBuilder: _eventTileBuilder,
+                              heightPerMinute: widget.heightPerMinute,
+                              hourIndicatorSettings: _hourIndicatorSettings,
+                              date: date,
+                              onTileTap: widget.onEventTap,
+                              onDateLongPress: widget.onDateLongPress,
+                              onTileDrag: widget.onTileDrag,
+                              showLiveLine: widget.showLiveTimeLineInAllDays ||
+                                  date.compareWithoutTime(DateTime.now()),
+                              timeLineOffset: widget.timeLineOffset,
+                              timeLineWidth: _timeLineWidth,
+                              verticalLineOffset: widget.verticalLineOffset,
+                              showVerticalLine: widget.showVerticalLine,
+                              height: _height,
+                              controller: controller,
+                              hourHeight: _hourHeight,
+                              eventArranger: _eventArranger,
+                              minuteSlotSize: widget.minuteSlotSize,
+                              scrollNotifier: _scrollConfiguration,
+                              scrollController: _scrollController,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),

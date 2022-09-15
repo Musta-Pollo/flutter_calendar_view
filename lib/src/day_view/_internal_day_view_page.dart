@@ -70,12 +70,18 @@ class InternalDayViewPage<T extends Object?> extends StatelessWidget {
   /// Called when user long press on calendar.
   final DatePressCallback? onDateLongPress;
 
+  // Called when dragging over dragTarget
+  final TileDragCallback? onTileDrag;
+
   /// Defines size of the slots that provides long press callback on area
   /// where events are not there.
   final MinuteSlotSize minuteSlotSize;
 
   /// Notifies if there is any event that needs to be visible instantly.
   final EventScrollConfiguration scrollNotifier;
+
+  /// ScrollController
+  final ScrollController scrollController;
 
   /// Defines a single day page.
   const InternalDayViewPage({
@@ -100,6 +106,8 @@ class InternalDayViewPage<T extends Object?> extends StatelessWidget {
     required this.onDateLongPress,
     required this.minuteSlotSize,
     required this.scrollNotifier,
+    required this.onTileDrag,
+    required this.scrollController,
   }) : super(key: key);
 
   @override
@@ -127,6 +135,7 @@ class InternalDayViewPage<T extends Object?> extends StatelessWidget {
             date: date,
             onDateLongPress: onDateLongPress,
             minuteSlotSize: minuteSlotSize,
+            onTileDrag: onTileDrag,
           ),
           Align(
             alignment: Alignment.centerRight,
@@ -139,6 +148,7 @@ class InternalDayViewPage<T extends Object?> extends StatelessWidget {
               heightPerMinute: heightPerMinute,
               eventTileBuilder: eventTileBuilder,
               scrollNotifier: scrollNotifier,
+              scrollController: scrollController,
               width: width -
                   timeLineWidth -
                   hourIndicatorSettings.offset -

@@ -189,6 +189,8 @@ class EventGenerator<T extends Object?> extends StatelessWidget {
 
   final EventScrollConfiguration scrollNotifier;
 
+  final ScrollController scrollController;
+
   /// A widget that display event tiles in day/week view.
   const EventGenerator({
     Key? key,
@@ -201,7 +203,28 @@ class EventGenerator<T extends Object?> extends StatelessWidget {
     required this.date,
     required this.onTileTap,
     required this.scrollNotifier,
+    required this.scrollController,
   }) : super(key: key);
+
+  // /// Listens to changes and scrolls view if nessesary
+  // Widget _createListener(Widget child) {
+  //   return Listener(
+  //     child: child,
+  //     onPointerMove: (event) {
+  //       final render =
+  //           dayViewPageKey.currentContext?.findRenderObject() as RenderBox;
+  //       final position = render.localToGlobal(Offset.zero);
+  //       final topY = position.dy;
+  //       final bottomY = topY + render.size.height;
+
+  //       // I/flutter ( 4972): x: 80.0, y: 80.0, height: 560.0, width: 360.0
+  //       print('x: ${position.dy}, '
+  //           'y: ${position.dy}, '
+  //           'height: ${render.size.height}, '
+  //           'width: ${render.size.width}');
+  //     },
+  //   );
+  // }
 
   /// Arrange events and returns list of [Widget] that displays event
   /// tile on display area. This method uses [eventArranger] to get position
@@ -278,6 +301,29 @@ class EventGenerator<T extends Object?> extends StatelessWidget {
   }
 }
 
+class DraggableEvent {
+  DateTime time;
+  Object obj;
+  DraggableEvent({
+    required this.time,
+    required this.obj,
+  });
+}
+
+const List<Color> selectionColors = [
+  Color(0xffccffb4),
+  Color(0xffEBFFB4),
+  Color(0xffB4FFC9),
+  Color(0xffFDFFB4),
+  Color(0xffFFD8B4),
+  Color(0xffffcbb4),
+  Color(0xffB4E4FF),
+  Color(0xffC7B4FF),
+  Color(0xffFDB4FF),
+  Color(0xffFFB4E1),
+  Color(0xffFFB4B4),
+];
+
 /// A widget that allow to long press on calendar.
 class PressDetector extends StatelessWidget {
   /// Height of display area
@@ -295,6 +341,9 @@ class PressDetector extends StatelessWidget {
   /// Called when user long press on calendar.
   final DatePressCallback? onDateLongPress;
 
+  // Called when dragging over dragTarget
+  final TileDragCallback? onTileDrag;
+
   /// Defines size of the slots that provides long press callback on area
   /// where events are not available.
   final MinuteSlotSize minuteSlotSize;
@@ -308,6 +357,7 @@ class PressDetector extends StatelessWidget {
     required this.date,
     required this.onDateLongPress,
     required this.minuteSlotSize,
+    required this.onTileDrag,
   }) : super(key: key);
 
   @override
@@ -337,7 +387,44 @@ class PressDetector extends StatelessWidget {
                     minuteSlotSize.minutes * i,
                   ),
                 ),
-                child: SizedBox(width: width, height: heightPerSlot),
+                child: DragTarget<Object>(
+                  // onMove: (details) {
+                  //   EasyDebounce.debounce(
+                  //     'my-debouncer', // <-- An ID for this particular debouncer
+                  //     Duration(milliseconds: 50), // <-- The debounce duration
+                  //     () => onTileDrag?.call(DraggableEvent(
+                  //       time: DateTime(
+                  //         date.year,
+                  //         date.month,
+                  //         date.day,
+                  //         0,
+                  //         minuteSlotSize.minutes * i,
+                  //       ),
+                  //       obj: details.data,
+                  //     )), // <-- The target method
+                  //   );
+                  // },
+                  onAccept: (data) {
+                    onTileDrag?.call(DraggableEvent(
+                      time: DateTime(
+                        date.year,
+                        date.month,
+                        date.day,
+                        0,
+                        minuteSlotSize.minutes * i,
+                      ),
+                      obj: data,
+                    ));
+                  },
+                  builder: (context, candidateData, rejectedData) {
+                    return Container(
+                        color: candidateData.isNotEmpty
+                            ? Colors.white.withOpacity(0.15)
+                            : null,
+                        width: width,
+                        height: heightPerSlot);
+                  },
+                ),
               ),
             ),
         ],

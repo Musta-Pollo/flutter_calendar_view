@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import 'calendar_event_data.dart';
+import 'components/_internal_components.dart';
 
 typedef CellBuilder<T extends Object?> = Widget Function(
   DateTime date,
@@ -49,6 +50,8 @@ typedef CellTapCallback<T extends Object?> = void Function(
     List<CalendarEventData<T>> events, DateTime date);
 
 typedef DatePressCallback = void Function(DateTime date);
+
+typedef TileDragCallback = void Function(DraggableEvent draggableEvent);
 
 typedef EventFilter<T extends Object?> = List<CalendarEventData<T>> Function(
     DateTime date, List<CalendarEventData<T>> events);
